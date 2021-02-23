@@ -13,7 +13,7 @@ from tutorial.snippets.serializers import SnippetSerializer
 
 @api_view(['GET', 'POST'])
 @csrf_exempt
-def snippet_list(request) -> HttpResponse:
+def snippet_list(request, format=None) -> HttpResponse:
     if request.method == 'GET':
         snippets: List[Snippet] = Snippet.objects.all()
         serializer: SnippetSerializer = SnippetSerializer(instance=snippets, many=True)
@@ -30,7 +30,7 @@ def snippet_list(request) -> HttpResponse:
 
 @api_view(['GET', 'PUT', 'DELETE'])
 @csrf_exempt
-def snippet_detail(request, pk) -> HttpResponse:
+def snippet_detail(request, pk: int, format=None) -> HttpResponse:
     """
     Retrieve, update or delete a code snippet.
     """
