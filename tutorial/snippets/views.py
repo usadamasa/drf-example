@@ -2,17 +2,18 @@ from typing import List
 
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
+from rest_framework.response import Response
 
 from tutorial.snippets.models import Snippet
 from tutorial.snippets.serializers import SnippetSerializer
 
 
+@api_view(['GET', 'POST'])
 @csrf_exempt
 def snippet_list(request) -> HttpResponse:
-    """
-
-    """
     if request.method == 'GET':
         snippets: List[Snippet] = Snippet.objects.all()
         serializer: SnippetSerializer = SnippetSerializer(instance=snippets, many=True)
@@ -27,6 +28,7 @@ def snippet_list(request) -> HttpResponse:
         return JsonResponse(serializer.data, status=201)
 
 
+@api_view(['GET', 'PUT', 'DELETE'])
 @csrf_exempt
 def snippet_detail(request, pk) -> HttpResponse:
     """
@@ -35,7 +37,7 @@ def snippet_detail(request, pk) -> HttpResponse:
     try:
         snippet = Snippet.objects.get(pk=pk)
     except Snippet.DoesNotExist:
-        return HttpResponse(status=404)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = SnippetSerializer(snippet)
@@ -45,10 +47,10 @@ def snippet_detail(request, pk) -> HttpResponse:
         data = JSONParser().parse(request)
         serializer = SnippetSerializer(snippet, data=data)
         if not serializer.is_valid():
-            return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
     if request.method == 'DELETE':
         snippet.delete()
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
