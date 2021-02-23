@@ -6,26 +6,31 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from tutorial.snippets.models import Snippet
 from tutorial.snippets.serializers import SnippetSerializer
 
 
-@api_view(['GET', 'POST'])
-@csrf_exempt
-def snippet_list(request, format=None) -> HttpResponse:
-    if request.method == 'GET':
+class SnippetList(APIView):
+    def get(self, request, format=None) -> HttpResponse:
         snippets: List[Snippet] = Snippet.objects.all()
         serializer: SnippetSerializer = SnippetSerializer(instance=snippets, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    if request.method == 'POST':
+    def post(self, request, format=None) -> HttpResponse:
         data = JSONParser().parse(request)
         serializer: SnippetSerializer = SnippetSerializer(data=data)
         if not serializer.is_valid():
             return JsonResponse(serializer.errors, status=400)
         serializer.save()
         return JsonResponse(serializer.data, status=201)
+
+
+# @api_view(['GET', 'POST'])
+# @csrf_exempt
+# def snippet_list(request, format=None) -> HttpResponse:
+#     if request.method == 'POST':
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
