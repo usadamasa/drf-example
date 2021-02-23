@@ -1,22 +1,23 @@
-from typing import List
-
 from django.contrib.auth.models import Group, User
 from django.db.models import QuerySet
-from rest_framework import permissions, viewsets
-from rest_framework.permissions import BasePermission
+from rest_framework import generics, permissions, viewsets
 
 from .serializers import GroupSerializer, UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserList(generics.ListAPIView):
     """
     API endpoint
     """
     queryset: QuerySet = User.objects.all().order_by('-date_joined')
     serializer_class: UserSerializer = UserSerializer
-    permission_classes: List[BasePermission] = [
-        permissions.IsAuthenticated
-    ]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class GroupViewSet(viewsets.ModelViewSet):
